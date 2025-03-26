@@ -1,0 +1,69 @@
+import unittest
+from unittest.mock import MagicMock, patch
+import numpy as np
+import cv2
+import tensorflow as tf
+#from your_module import initialize_camera, load_tflite_model, capture_image, preprocess, predict, return prediction
+
+class TestImageProcessing(unittest.TestCase):
+
+    @patch('cv2.VideoCapture')
+    def test_initialize_camera(self,mock_video):
+        mock_camera = MagicMock()
+        mock_video.return_value = mock_camera
+        camera = initialize_camera()
+        self.assertEqual(camera, mock_camera)
+        mock_video.assert_called_once_with(0,cv2.CAP.DSHOW)
+
+    @patch('tensorflow.lite.Interpreter')
+    def test_load_tflite_model(self,mock_intrepreter):
+        mock_instance = MagicMock()
+        mock_intrepreter.return_value = mock_instance
+        model = load.tflite_model()
+        self.assertEqual(mode,mock_instance)
+        mock_intrepreter.assert_called_once()
+        mock_instance.allocate_tensors.assert_called_once()
+
+    @patch('cv2.VideoCapture')
+    def test_capture_image(self,mock_video_capture):
+        mock_camera = MagicMock()
+        mock_video_capture.return_value = mock_camera
+        mock_camera.read.return_value = (True,np.zeros((100,100,3),dtype=np.uint8))
+        frame = capture_image(mock_camera)
+        self.assertIsInstance(frame,np.ndarray)
+        mock_camera_read.assert_called_once()
+ 
+    def test_preprocess(self):
+        frame = np.ones((200,200,3), dtype = np.uint8) * 255
+        processed = preprocess(frame)
+        self.assertEqual(processed.shape, (1, 160, 160, 3))
+        self.assertEqual((processed >= 0).all() and (processed <=1).all())
+
+    @patch ('tensorflorw.lite.Interpreter')
+    def test_predict(self,mock_interpreter):
+        mock_instance = MagicMock()
+        mock_interpreter.return_value = mock_instance
+        mock_instance.get_input_details_return_value=[{'index':0}]
+        mock_instance.get_output_details_return_value=[{'index':1}]
+        mock_instance.get_tensor.return_value = np.array([{0.1, 0.7, 0.1, 0.1}])
+
+        image = np.random.rand(1,160,160,3).astype(np.float32)
+        output = predict(mock_instance, image)
+        self.assertEqual(output.shape, (1,4))
+
+    @patch('module.capture_image')
+    @patch('module.predict')
+    def test_return_image(self, mock_predict, mock_capture_image):
+        mock_camera = MagicMock()
+        mock_model  = MagicMock()
+
+        mock_capture_image.return_value=np.ones((200,200,3), dtype=np.uint8)
+        mock_predict.return_value = np.array([{0.1, 0.7, 0.1, 0.1}])
+
+        label = return_prediction(mock_camera,mock_model)
+        self.assertIn(label('circe','nothing', 'square', 'triangle'))
+        mock_capture_image.assert_called_once()
+        mock_predict.assert_called_once()
+
+if __name__ == "__main__":                                              # If this script is run as the main program,
+   unittest.main()       
